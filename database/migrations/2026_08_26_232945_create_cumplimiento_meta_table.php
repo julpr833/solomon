@@ -15,6 +15,7 @@ return new class extends Migration {
                 ->foreignId("Habito_ID")
                 ->constrained("habito", "ID_Habito")
                 ->onDelete("cascade");
+            $table->smallInteger("RachaRequerida");
             $table
                 ->foreign("RachaRequerida")
                 ->references("RachaRequerida")

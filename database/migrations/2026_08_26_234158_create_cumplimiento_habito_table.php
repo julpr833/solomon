@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create("cumplimiento_habito", function (Blueprint $table) {
             $table
                 ->foreignId("Habito_ID")
-                ->constrained("ID_Habito", "habito")
+                ->constrained("habito", "ID_Habito")
                 ->onDelete("cascade");
             $table->timestamp("MarcaCumplimiento")->primary()->useCurrent();
             $table->smallInteger("RachaAlCumplir");

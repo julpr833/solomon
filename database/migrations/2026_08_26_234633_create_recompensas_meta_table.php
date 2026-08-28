@@ -15,9 +15,11 @@ return new class extends Migration {
                 ->foreignId("Habito_ID")
                 ->constrained("habito", "ID_Habito")
                 ->onDelete("cascade");
+            $table->smallInteger("RachaRequerida");
             $table
-                ->foreignId("RachaRequerida")
-                ->constrained("habito", "RachaRequerida")
+                ->foreign("RachaRequerida")
+                ->references("RachaRequerida")
+                ->on("meta")
                 ->onDelete("cascade");
             $table
                 ->foreignId("Recompensa_ID")
