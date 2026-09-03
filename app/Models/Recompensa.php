@@ -21,6 +21,6 @@ class Recompensa extends Model
             "recompensas_meta",
             "Recompensa_ID",
             "Habito_ID"
-        )
+        );
     }
 }
