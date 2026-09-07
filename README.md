@@ -1,4 +1,8 @@
-# Solomon
+<div align="center">
+    <img src="https://i.imgur.com/dIPCDst.png">
+</div>
+
+---
 
 Habit/goal tracking web application built with Laravel 13 and Tailwind CSS 4.
 
