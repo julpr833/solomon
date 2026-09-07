@@ -1,0 +1,30 @@
+# Configuracion de Nginx para servir la aplicacion Laravel.
+# El proxy PHP-FPM apunta a 127.0.0.1:9000 (ambos contenedores comparten la misma red/pod).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: solomon
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        index index.php index.html;
+        root /var/www/public;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
+
+        location ~ /\.ht {
+            deny all;
+        }
+    }
