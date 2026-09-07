@@ -1,0 +1,75 @@
+name: Deploy to AKS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/julpr833/solomon
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/php/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          cluster-name: laravelAKSCluster
+          resource-group: laravelResourceGroup
+
+      - name: Deploy manifests
+        run: |
+          kubectl apply -f k8s/namespace.yml
+          kubectl apply -f k8s/app-secrets.yml
+          kubectl apply -f k8s/app-config.yaml
+          kubectl apply -f k8s/nginx-config.yaml
+          kubectl apply -f k8s/mysql-manifest.yml
+          kubectl apply -f k8s/deployment.yml
+          kubectl apply -f k8s/ingress.yml
+
+      - name: Run migrations
+        run: |
+          kubectl delete job solomon-migrate --ignore-not-found -n solomon
+          kubectl apply -f k8s/migrate-job.yml
+          kubectl wait --for=condition=complete job/solomon-migrate --timeout=180s -n solomon
+
+      - name: Rollout app
+        run: kubectl rollout restart deployment/solomon -n solomon && kubectl rollout status deployment/solomon -n solomon --timeout=180s
+
+      - name: Verify
+        run: kubectl get pods -n solomon
