@@ -1,0 +1,70 @@
+# Ejecuta las migraciones de Laravel contra la base de datos.
+# Reemplaza el paso `composer setup` del docker-compose en un entorno K8s.
+# Correr una sola vez tras el primer despliegue de MySQL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: solomon-migrate
+  namespace: solomon
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      imagePullSecrets:
+        - name: ghcr-pull
+      initContainers:
+        - name: wait-for-mysql
+          image: ghcr.io/julpr833/solomon:latest
+          command:
+            - sh
+            - -c
+            - until (php -r '$r=new ReflectionClass(PDO::class); $p=@new PDO("mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"),getenv("DB_USERNAME"),getenv("DB_PASSWORD")); exit($p?0:1);') do sleep 5; done
+          envFrom:
+            - configMapRef:
+                name: solomon-config
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-password
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-name
+      containers:
+        - name: migrate
+          image: ghcr.io/julpr833/solomon:latest
+          imagePullPolicy: Always
+          command: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - configMapRef:
+                name: solomon-config
+          env:
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: app-key
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-password
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: solomon-secrets
+                  key: db-name

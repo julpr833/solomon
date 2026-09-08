@@ -1,0 +1,33 @@
+# Configuracion no sensible de la aplicacion Laravel.
+# Los valores secretos (APP_KEY, credenciales DB) viven en el Secret "solomon-secrets".
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: solomon-config
+  namespace: solomon
+data:
+  APP_NAME: "Solomon"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "http://solomon.local"
+  APP_LOCALE: "es"
+  APP_FALLBACK_LOCALE: "es"
+  APP_FAKER_LOCALE: "es_ES"
+  APP_MAINTENANCE_DRIVER: "file"
+
+  LOG_CHANNEL: "stderr"
+  LOG_LEVEL: "warning"
+
+  # Base de datos: apunta al Service del StatefulSet mysql dentro del cluster
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql"
+  DB_PORT: "3306"
+
+  SESSION_DRIVER: "database"
+  SESSION_LIFETIME: "120"
+  SESSION_SECURE_COOKIE: "false"
+
+  CACHE_STORE: "database"
+  QUEUE_CONNECTION: "database"
+  BROADCAST_CONNECTION: "log"
+  FILESYSTEM_DISK: "local"
