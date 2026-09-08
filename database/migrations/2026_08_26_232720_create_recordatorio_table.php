@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->foreignId("Habito_ID")
                 ->constrained("habito", "ID_Habito")
                 ->onDelete("cascade");
-            $table->time("Horario");
+            $table->timestamp("ProximaFecha");
             $table->string("Mensaje", 300)->nullable();
             $table->timestamps();
         });
