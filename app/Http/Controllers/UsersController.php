@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
-class UsersController
+class UsersController extends Controller
 {
     public function home()
     {
-        return "Hola, UsersController, / (home)";
+        return 'Hola, UsersController, / (home)';
     }
 
     public function signup()
     {
-        return "Hola, UsersController, /registrarse";
+        return 'Hola, UsersController, /registrarse';
     }
 
     public function login()
     {
-        return "Hola, UsersController, /ingresar";
+        return 'Hola, UsersController, /ingresar';
     }
 
     public function logout()
     {
-        return "Hola, UsersController, /cerrar-sesion";
+        return 'Hola, UsersController, /cerrar-sesion';
     }
 }

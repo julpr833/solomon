@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
-class GoalsController
+class GoalsController extends Controller
 {
     public function index()
     {
-        return "Hola, GoalsController, /metas";
+        return 'Hola, GoalsController, /metas';
     }
 
     public function create()
     {
-        return "Hola, GoalsController, /metas/crear";
+        return 'Hola, GoalsController, /metas/crear';
     }
 
     public function edit()
     {
-        return "Hola, GoalsController, /metas/editar";
+        return 'Hola, GoalsController, /metas/editar';
     }
 
     public function delete()
     {
-        return "Hola, GoalsController, /metas/eliminar";
+        return 'Hola, GoalsController, /metas/eliminar';
     }
 }

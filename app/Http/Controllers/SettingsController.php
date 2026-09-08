@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
-class SettingsController
+class SettingsController extends Controller
 {
     public function settings()
     {
-        return "Hola, SettingsController, /configuracion";
+        return 'Hola, SettingsController, /configuracion';
     }
 }

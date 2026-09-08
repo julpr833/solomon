@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
-class HabitsController {
+class HabitsController extends Controller
+{
     public function dashboard()
     {
-        return "Hola, HabitsController, /dashboard";
+        return 'Hola, HabitsController, /dashboard';
     }
 
     public function show($id)
@@ -18,16 +19,16 @@ class HabitsController {
 
     public function create()
     {
-        return "Hola, HabitsController, /habito/crear";
+        return 'Hola, HabitsController, /habito/crear';
     }
 
     public function edit()
     {
-        return "Hola, HabitsController, /habito/editar";
+        return 'Hola, HabitsController, /habito/editar';
     }
 
     public function delete()
     {
-        return "Hola, HabitsController, /habito/eliminar";
+        return 'Hola, HabitsController, /habito/eliminar';
     }
 }
