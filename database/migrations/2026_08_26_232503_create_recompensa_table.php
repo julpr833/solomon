@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id("ID_Recompensa");
             $table
                 ->foreignId("Usuario_ID")
-                ->constrained("usuario", "ID_Usuario")
+                ->constrained("users", "ID_Usuario")
                 ->onDelete("cascade");
             $table->string("Nombre", 45);
             $table->string("Descripcion", 150)->nullable();

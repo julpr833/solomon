@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id("ID_Habito");
             $table
                 ->foreignId("Usuario_ID")
-                ->constrained("usuario", "ID_Usuario")
+                ->constrained("users", "ID_Usuario")
                 ->onDelete("cascade");
             $table->string("Objetivo", 45);
             $table->string("Descripcion", 300)->nullable();
