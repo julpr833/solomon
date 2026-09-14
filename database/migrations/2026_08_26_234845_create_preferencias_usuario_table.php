@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create("preferencias_usuario", function (Blueprint $table) {
             $table
                 ->foreignId("Usuario_ID")
-                ->constrained("usuario", "ID_Usuario")
+                ->constrained("users", "ID_Usuario")
                 ->onDelete("cascade");
             $table
                 ->enum("ContenidoMotivacional", [
