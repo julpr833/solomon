@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class UsersController extends Controller
 {
@@ -24,11 +27,26 @@ class UsersController extends Controller
 
     public function loginStore(LoginRequest $request)
     {
-        // ...
+        $credentials = $request->only('email', 'password');
+        if (!Auth::attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'email' => ['Las credenciales ingresadas son incorrectas.'],
+            ]);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        return redirect()->route('home');
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }
