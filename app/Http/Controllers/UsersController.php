@@ -2,27 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use Illuminate\Routing\Controller;
 
 class UsersController extends Controller
 {
     public function home()
     {
-        return 'Hola, UsersController, / (home)';
+        return view('landing');
     }
 
     public function signup()
     {
-        return 'Hola, UsersController, /registrarse';
+        return view('auth.signup');
     }
 
     public function login()
     {
-        return 'Hola, UsersController, /ingresar';
+        return view('auth.login');
+    }
+
+    public function loginStore(LoginRequest $request)
+    {
+        // ...
     }
 
     public function logout()
     {
-        return 'Hola, UsersController, /cerrar-sesion';
+        return redirect()->route('home');
     }
 }

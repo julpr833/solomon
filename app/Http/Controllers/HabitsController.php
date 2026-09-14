@@ -8,27 +8,26 @@ class HabitsController extends Controller
 {
     public function dashboard()
     {
-        return 'Hola, HabitsController, /dashboard';
+        return view('habits.dashboard');
     }
 
     public function show($id)
     {
-        // Concatenamos el ID para que puedas ver que funciona el parámetro dinámico
-        return "Hola, HabitsController, /habito/{$id}";
+        return view('habits.show', compact('id'));
     }
 
     public function create()
     {
-        return 'Hola, HabitsController, /habito/crear';
+        return redirect()->back();
     }
 
     public function edit()
     {
-        return 'Hola, HabitsController, /habito/editar';
+        return redirect()->back();
     }
 
     public function delete()
     {
-        return 'Hola, HabitsController, /habito/eliminar';
+        return redirect()->back();
     }
 }

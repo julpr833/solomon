@@ -8,21 +8,21 @@ class GoalsController extends Controller
 {
     public function index()
     {
-        return 'Hola, GoalsController, /metas';
+        return view('goals.index');
     }
 
     public function create()
     {
-        return 'Hola, GoalsController, /metas/crear';
+        return redirect()->back();
     }
 
     public function edit()
     {
-        return 'Hola, GoalsController, /metas/editar';
+        return redirect()->back();
     }
 
     public function delete()
     {
-        return 'Hola, GoalsController, /metas/eliminar';
+        return redirect()->back();
     }
 }
