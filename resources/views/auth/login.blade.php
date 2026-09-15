@@ -15,19 +15,19 @@
             <div class="mb-4">
                 <label for="email" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Correo electrónico</label>
                 <input type="email" id="email" name="email"
-                    class="block w-full px-3.5 py-3 border-[1.5px] rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="tu@correo.com" required>
+                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
+                    placeholder="Correo electrónico..." value="{{ old('email') }}" required>
+                @error('email')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
             </div>
-            @error('email')
-                <p class="text-center text-red-500 text-sm my-1">{{ $message }}</p>
-            @enderror
-            <div class="mb-2">
+            <div class="mb-4">
                 <label for="password" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Contraseña</label>
                 <input type="password" id="password" name="password"
-                    class="block w-full px-3.5 py-3 border-[1.5px] rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="••••••••" required>
+                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
+                    placeholder="Contraseña" required>
                 @error('password')
-                    <p class="text-center text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
             </div>
             <button type="submit"
