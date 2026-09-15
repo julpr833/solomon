@@ -15,6 +15,7 @@ Route::get('/home', [UsersController::class, 'home']);
 
 // --- Rutas de Usuarios ---
 Route::get('/registrarse', [UsersController::class, 'signup'])->name('signup')->middleware('guest');
+Route::post('/registrarse', [UsersController::class, 'signUpStore'])->name('signup')->middleware('guest');
 Route::get('/ingresar', [UsersController::class, 'login'])->name('login')->middleware('guest');
 Route::post('/ingresar', [UsersController::class, 'loginStore'])->name('login.store')->middleware('guest');
 Route::post('/cerrar-sesion', [UsersController::class, 'logout'])->name('logout')->middleware('auth'); // Generalmente es POST por seguridad

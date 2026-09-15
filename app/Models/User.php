@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(["NombreUsuario", "Correo", "Contrasenia_Hash"])]
-#[Hidden(["Contrasenia_Hash", "remember_token"])]
+#[Fillable(["NombreUsuario", "email", "password", "Avatar_URL", "Sexo", "telefono"])]
+#[Hidden(["password", "remember_token"])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
