@@ -12,13 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(["name", "email", "password"])]
+#[Fillable(["NombreUsuario", "email", "password", "Avatar_URL", "Sexo", "telefono"])]
 #[Hidden(["password", "remember_token"])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-    public $table = "usuario";
+    public $table = "users";
+    protected $primaryKey = 'ID_Usuario';
 
     public function habitos(): HasMany
     {

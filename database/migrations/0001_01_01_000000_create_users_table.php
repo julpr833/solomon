@@ -10,11 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create("usuario", function (Blueprint $table) {
+        Schema::create("users", function (Blueprint $table) {
             $table->id("ID_Usuario");
             $table->string("NombreUsuario", 25)->unique();
-            $table->string("Correo", 255)->unique();
-            $table->string("Contrasenia_Hash", 255);
+            $table->string("email", 255)->unique();
+            $table->string("password", 255);
             $table->timestamp("email_verified_at")->nullable();
             $table->timestamp("FechaRegistro")->useCurrent();
             $table->string("Avatar_URL", 120);
@@ -46,7 +46,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("usuario");
+        Schema::dropIfExists("users");
         Schema::dropIfExists("password_reset_tokens");
         Schema::dropIfExists("sessions");
     }
