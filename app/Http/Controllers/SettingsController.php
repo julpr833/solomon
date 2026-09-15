@@ -8,6 +8,6 @@ class SettingsController extends Controller
 {
     public function settings()
     {
-        return view('settings.settings');
+        return 'Hola, SettingsController, /configuracion';
     }
 }

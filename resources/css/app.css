@@ -1,44 +1,9 @@
 @import 'tailwindcss';
 
-@source '../../resources/views/**/*.blade.php';
-@source '../../resources/js/**/*.js';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-
-    --color-brand-50: #00a6fb;
-    --color-brand-70: #0582ca;
-    --color-brand-80: #006494;
-    --color-brand-90: #003554;
-    --color-brand-95: #051923;
-
-    --color-orange: #f59e0b;
-    --color-orange-bg: #fef3c7;
-    --color-green: #10b981;
-    --color-green-bg: #d1fae5;
-
-    --color-page: #f0f4f8;
-    --color-ink: #051923;
-    --color-ink-light: #6b7b8d;
-    --color-line: #d0d8e2;
-
-    --color-danger: #e74c3c;
-
-    --shadow-card: 0 2px 8px rgba(5, 25, 35, 0.08);
-
-    --animate-fade-in: fade-in 0.35s ease-out;
-
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(4px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
 }
