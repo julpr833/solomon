@@ -8,16 +8,16 @@ class RewardsController extends Controller
 {
     public function create()
     {
-        return redirect()->back();
+        return 'Hola, RewardsController, /recompensas/crear';
     }
 
     public function edit()
     {
-        return redirect()->back();
+        return 'Hola, RewardsController, /recompensas/editar';
     }
 
     public function delete()
     {
-        return redirect()->back();
+        return 'Hola, RewardsController, /recompensas/eliminar';
     }
 }
