@@ -5,9 +5,7 @@
 @section('topbar')
     <x-topbar title="Metas y Recompensas" icon="ti-trophy">
         <x-slot:right>
-            <a href="{{ route('settings') }}">
-                @include('partials.avatar', ['user' => auth()->user()])
-            </a>
+            @include('partials.avatar', ['user' => auth()->user()])
         </x-slot:right>
     </x-topbar>
 @endsection
@@ -86,15 +84,15 @@
     </div>
 
     <div class="mt-4 flex gap-3">
-        <button type="button" class="inline-flex flex-1 items-center justify-center gap-1.5 px-6 py-3 rounded-lg font-semibold text-[15px] cursor-pointer bg-transparent text-brand-70 border-[1.5px] border-brand-70 hover:bg-brand-70 hover:text-white transition-opacity duration-200 active:scale-[0.98]" onclick="document.getElementById('goalDialog').classList.add('open')"><i class="ti ti-plus"></i> Nueva meta</button>
-        <button type="button" class="inline-flex flex-1 items-center justify-center gap-1.5 px-6 py-3 rounded-lg font-semibold text-[15px] cursor-pointer bg-transparent text-brand-70 border-[1.5px] border-brand-70 hover:bg-brand-70 hover:text-white transition-opacity duration-200 active:scale-[0.98]" onclick="document.getElementById('rewardDialog').classList.add('open')"><i class="ti ti-plus"></i> Nueva recompensa</button>
+        <button type="button" class="inline-flex flex-1 items-center justify-center gap-1.5 px-6 py-3 rounded-lg font-semibold text-[15px] cursor-pointer bg-transparent text-brand-70 border-[1.5px] border-brand-70 hover:bg-brand-70 hover:text-white transition-opacity duration-200 active:scale-[0.98]" onclick="document.getElementById('goalDialog').classList.remove('hidden')"><i class="ti ti-plus"></i> Nueva meta</button>
+        <button type="button" class="inline-flex flex-1 items-center justify-center gap-1.5 px-6 py-3 rounded-lg font-semibold text-[15px] cursor-pointer bg-transparent text-brand-70 border-[1.5px] border-brand-70 hover:bg-brand-70 hover:text-white transition-opacity duration-200 active:scale-[0.98]" onclick="document.getElementById('rewardDialog').classList.remove('hidden')"><i class="ti ti-plus"></i> Nueva recompensa</button>
     </div>
 @endsection
 
 @section('footer')
-    <div id="rewardDialog" class="fixed inset-0 z-[100] hidden items-center justify-center bg-brand-95/50" onclick="if(event.target===this)this.classList.remove('open')">
-        <div class="max-h-[90vh] w-[90%] max-w-[440px] overflow-y-auto rounded-[14px] bg-white p-6 shadow-[0_8px_32px_rgba(5,25,35,0.2)]">
-            <span class="float-right cursor-pointer text-[22px] leading-none text-ink-light hover:text-ink" onclick="document.getElementById('rewardDialog').classList.remove('open')">&times;</span>
+    <div id="rewardDialog" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-brand-95/50 modal-backdrop" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="max-h-[90vh] w-[90%] max-w-[440px] overflow-y-auto rounded-[14px] bg-white p-6 shadow-[0_8px_32px_rgba(5,25,35,0.2)] modal-card">
+            <span class="float-right cursor-pointer text-[22px] leading-none text-ink-light hover:text-ink" onclick="document.getElementById('rewardDialog').classList.add('hidden')">&times;</span>
             <h2 class="mb-5 text-lg font-bold text-brand-90">Nueva Recompensa</h2>
             <form method="POST" action="{{ route('reward.create') }}">
                 @csrf
@@ -125,9 +123,9 @@
         </div>
     </div>
 
-    <div id="goalDialog" class="fixed inset-0 z-[100] hidden items-center justify-center bg-brand-95/50" onclick="if(event.target===this)this.classList.remove('open')">
-        <div class="max-h-[90vh] w-[90%] max-w-[440px] overflow-y-auto rounded-[14px] bg-white p-6 shadow-[0_8px_32px_rgba(5,25,35,0.2)]">
-            <span class="float-right cursor-pointer text-[22px] leading-none text-ink-light hover:text-ink" onclick="document.getElementById('goalDialog').classList.remove('open')">&times;</span>
+    <div id="goalDialog" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-brand-95/50 modal-backdrop" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="max-h-[90vh] w-[90%] max-w-[440px] overflow-y-auto rounded-[14px] bg-white p-6 shadow-[0_8px_32px_rgba(5,25,35,0.2)] modal-card">
+            <span class="float-right cursor-pointer text-[22px] leading-none text-ink-light hover:text-ink" onclick="document.getElementById('goalDialog').classList.add('hidden')">&times;</span>
             <h2 class="mb-5 text-lg font-bold text-brand-90">Nueva Meta</h2>
             <form method="POST" action="{{ route('goals.create') }}">
                 @csrf
@@ -166,7 +164,7 @@
         </div>
     </div>
 
-    <button type="button" class="fixed right-6 bottom-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-[28px] text-white shadow-[0_4px_16px_rgba(0,166,251,0.35)] cursor-pointer transition-transform duration-200 active:scale-90" onclick="document.getElementById('goalDialog').classList.add('open')"><i class="ti ti-plus"></i></button>
+    <button type="button" class="fixed right-6 bottom-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-[28px] text-white shadow-[0_4px_16px_rgba(0,166,251,0.35)] cursor-pointer transition-transform duration-200 active:scale-90" onclick="document.getElementById('goalDialog').classList.remove('hidden')"><i class="ti ti-plus"></i></button>
 
     @include('partials.bottom-nav', ['active' => 'goals'])
 @endsection
