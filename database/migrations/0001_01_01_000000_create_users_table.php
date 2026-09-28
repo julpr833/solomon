@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string("password", 255);
             $table->timestamp("email_verified_at")->nullable();
             $table->timestamp("FechaRegistro")->useCurrent();
-            $table->string("Avatar_URL", 120);
+            $table->string("Avatar_URL", 255);
             $table->string("Biografia", 300)->nullable();
             $table->enum("Sexo", ["M", "F"]);
             $table->string("telefono", 15)->unique()->nullable();
