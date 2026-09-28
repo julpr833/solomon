@@ -7,18 +7,23 @@
 @endsection
 
 @section('content')
+    @php
+        $settingUser = auth()->user();
+        $name = $settingUser?->NombreUsuario ?: 'Usuario';
+        $initial = strtoupper(mb_substr(trim($name), 0, 1));
+    @endphp
+
     <div class="mb-4 rounded-[10px] bg-white p-4 shadow-card">
         <div class="flex flex-col items-center gap-3 py-4 text-center">
-            <div
-                class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-70 text-2xl font-bold text-white">
-                {{ strtoupper(mb_substr(auth()->user()?->name ?: 'J', 0, 1)) }}
+            <div class="avatar avatar-lg" title="{{ $name }}">
+                <span class="avatar-initials">{{ $initial }}</span>
+                @if ($settingUser?->Avatar_URL)
+                    <img src="{{ $settingUser->Avatar_URL }}" alt="Avatar de {{ $name }}" onerror="this.style.display = 'none'">
+                @endif
             </div>
             <div>
-                <p class="font-semibold">{{ auth()->user()?->name ?: 'Juan Pérez' }}</p>
-                <p class="text-[13px] text-ink-light">{{ auth()->user()?->email ?: 'juan@correo.com' }}</p>
-                <button type="button"
-                    class="mt-2 inline-flex w-auto items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-[13px] cursor-pointer bg-transparent text-brand-70 border-[1.5px] border-brand-70 hover:bg-brand-70 hover:text-white transition-opacity duration-200 active:scale-[0.98]">Cambiar
-                    foto</button>
+                <p class="font-semibold">{{ $name }}</p>
+                <p class="text-[13px] text-ink-light">{{ $settingUser?->email ?: 'juan@correo.com' }}</p>
             </div>
         </div>
         <div class="mx-auto my-4 mb-6 flex w-[clamp(300px,70%,440px)] flex-row justify-around gap-3">
@@ -26,7 +31,9 @@
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green text-lg text-white"><i
                         class="ti ti-list"></i></div>
                 <div>
-                    <h4 class="text-[20px] font-bold leading-none text-ink">5</h4>
+                    <h4 class="text-[20px] font-bold text-center leading-none text-ink">
+                        {{ auth()->user()?->habitos()->count() }}
+                    </h4>
                     <p class="mt-0.5 text-xs text-ink-light">Hábitos creados</p>
                 </div>
             </div>
@@ -34,7 +41,8 @@
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange text-lg text-white"><i
                         class="ti ti-bolt"></i></div>
                 <div>
-                    <h4 class="text-[20px] font-bold leading-none text-ink">42</h4>
+                    <h4 class="text-[20px] font-bold text-center leading-none text-ink">{{ auth()->user()?->getMaxRacha() }}
+                    </h4>
                     <p class="mt-0.5 text-xs text-ink-light">Máxima racha</p>
                 </div>
             </div>
@@ -47,62 +55,6 @@
         </div>
     </div>
 
-    <h2 class="my-5 text-base font-bold text-brand-90">Notificaciones</h2>
-    <div class="mb-4 rounded-[10px] bg-white p-4 shadow-card">
-        <label class="flex cursor-pointer select-none items-center justify-between border-b border-line py-3.5">
-            <div>
-                <div class="text-sm font-medium">Recordatorios WhatsApp</div>
-                <div class="text-xs text-ink-light">Recibe avisos según tu frecuencia</div>
-            </div>
-            <input type="checkbox" id="toggle-whatsapp" class="peer sr-only" checked>
-            <span
-                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
-        </label>
-        <div class="py-3 pb-1" id="whatsapp-options-panel">
-            <div class="mb-3">
-                <label for="rem-freq" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Frecuencia</label>
-                <select id="rem-freq"
-                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    onchange="document.getElementById('rem-days').style.display = this.value === 'Días por semana' ? 'flex' : 'none';">
-                    <option>Diario</option>
-                    <option>Días por semana</option>
-                    <option>Una vez por semana</option>
-                </select>
-            </div>
-            <div id="rem-days" class="mt-1 flex justify-between gap-2" style="display: none;">
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-page text-xs font-semibold text-ink-light">L</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-white">M</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-white">M</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-white">J</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-page text-xs font-semibold text-ink-light">V</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-page text-xs font-semibold text-ink-light">S</span>
-                <span
-                    class="flex h-6 w-6 items-center justify-center rounded-lg bg-page text-xs font-semibold text-ink-light">D</span>
-            </div>
-            <div class="mt-3 mb-0">
-                <label for="rem-time" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Horario de envío</label>
-                <input type="time" id="rem-time"
-                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    value="20:00">
-            </div>
-        </div>
-        <label class="flex cursor-pointer select-none items-center justify-between border-b border-line py-3.5">
-            <div>
-                <div class="text-sm font-medium">Felicitar al cumplir metas</div>
-                <div class="text-xs text-ink-light">Mensaje cuando logres una meta</div>
-            </div>
-            <input type="checkbox" id="toggle-goals-congrats" class="peer sr-only" checked>
-            <span
-                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
-        </label>
-    </div>
-
     <h2 class="my-5 text-base font-bold text-brand-90">Contenido motivacional</h2>
     <div class="mb-4 rounded-[10px] bg-white p-4 shadow-card">
         <label class="flex cursor-pointer select-none items-center justify-between border-b border-line py-3.5">
@@ -112,7 +64,7 @@
             </div>
             <input type="checkbox" id="toggle-proverbs" class="peer sr-only" checked>
             <span
-                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
+                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
         </label>
         <label class="flex cursor-pointer select-none items-center justify-between py-3.5">
             <div>
@@ -121,7 +73,7 @@
             </div>
             <input type="checkbox" id="toggle-quotes" class="peer sr-only" checked>
             <span
-                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
+                class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
         </label>
     </div>
 

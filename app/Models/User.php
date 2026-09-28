@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable(["NombreUsuario", "email", "password", "Avatar_URL", "Sexo", "telefono"])]
 #[Hidden(["password", "remember_token"])]
@@ -51,5 +52,40 @@ class User extends Authenticatable
             "email_verified_at" => "datetime",
             "password" => "hashed",
         ];
+    }
+
+    public function getMaxRacha(): int
+    {
+        return DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->max('ch.RachaAlCumplir') ?? 0;
+    }
+
+    public function getCurrentRacha(): int
+    {
+        $lastCompletion = DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->select('ch.RachaAlCumplir', 'ch.MarcaCumplimiento')
+            ->orderByDesc('ch.MarcaCumplimiento')
+            ->first();
+
+        $lastFailure = DB::table('fallo_habito as f')
+            ->join('habito as h', 'h.ID_Habito', '=', 'f.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->select('f.MarcaFallo')
+            ->orderByDesc('f.MarcaFallo')
+            ->first();
+
+        if (!$lastCompletion) {
+            return 0;
+        }
+
+        if ($lastFailure && $lastFailure->MarcaFallo > $lastCompletion->MarcaCumplimiento) {
+            return 0;
+        }
+
+        return (int) $lastCompletion->RachaAlCumplir;
     }
 }

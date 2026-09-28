@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../resources/views/**/*.blade.php';
 @source '../../resources/js/**/*.js';
@@ -6,8 +6,10 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 
     --color-brand-50: #00a6fb;
     --color-brand-70: #0582ca;
@@ -28,6 +30,76 @@
     --color-danger: #e74c3c;
 
     --shadow-card: 0 2px 8px rgba(5, 25, 35, 0.08);
+
+    --shadow-avatar: 0 2px 8px rgba(5, 25, 35, 0.25);
+}
+
+@layer components {
+    .avatar {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--color-brand-50);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1;
+        user-select: none;
+        box-shadow: var(--shadow-avatar);
+    }
+
+    .avatar .avatar-initials {
+        position: relative;
+    }
+
+    .avatar img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+.avatar-lg {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.5rem;
+    }
+
+    .modal-backdrop {
+        animation: modal-fade-in 0.2s ease-out;
+    }
+
+    .modal-card {
+        animation: modal-pop-in 0.25s ease-out;
+    }
+
+    @keyframes modal-fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes modal-pop-in {
+        from {
+            opacity: 0;
+            transform: translateY(12px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
 
     --animate-fade-in: fade-in 0.35s ease-out;
 
