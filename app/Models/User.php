@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 #[Fillable(["NombreUsuario", "email", "password", "Avatar_URL", "Sexo", "telefono"])]
@@ -34,6 +35,29 @@ class User extends Authenticatable
             "Usuario_ID",
             "ID_Usuario",
         );
+    }
+
+    public function updatePreferences(array $attributes): PreferenciasUsuario
+    {
+        return $this->preferencias()->updateOrCreate(
+            ["Usuario_ID" => $this->ID_Usuario],
+            $attributes,
+        );
+    }
+
+    public function getContenidoMotivacional(): string
+    {
+        return $this->preferencias?->ContenidoMotivacional ?? "Ambos";
+    }
+
+    public function wantsProverbios(): bool
+    {
+        return in_array($this->getContenidoMotivacional(), ["Proverbios", "Ambos"], true);
+    }
+
+    public function wantsFrases(): bool
+    {
+        return in_array($this->getContenidoMotivacional(), ["Frases", "Ambos"], true);
     }
 
     public function recompensas(): HasMany
@@ -87,5 +111,104 @@ class User extends Authenticatable
         }
 
         return (int) $lastCompletion->RachaAlCumplir;
+    }
+
+    public function getTodaysCompletedHabits(): int
+    {
+        return DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->whereDate('ch.MarcaCumplimiento', now()->toDateString())
+            ->distinct()
+            ->count('ch.Habito_ID');
+    }
+
+    public function getTodaysHabitCount(): int
+    {
+        $lastCompletions = DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->groupBy('ch.Habito_ID')
+            ->select('ch.Habito_ID', DB::raw('MAX(ch.MarcaCumplimiento) as ultima_marca'))
+            ->pluck('ultima_marca', 'ch.Habito_ID');
+
+        return $this->habitos()->get()->filter(function (Habito $habit) use ($lastCompletions) {
+            $lastMark = $lastCompletions[$habit->ID_Habito] ?? null;
+
+            if (!$lastMark) {
+                return true;
+            }
+
+            $lastMark = Carbon::parse($lastMark);
+
+            $next = match ($habit->Frecuencia) {
+                'Pluridiaria', 'Daria' => $lastMark->copy()->addDay(),
+                'Semanal' => $lastMark->copy()->addWeek(),
+                'Mensual' => $lastMark->copy()->addMonth(),
+                'Anual' => $lastMark->copy()->addYear(),
+                default => $lastMark->copy()->addDay(),
+            };
+
+            return $next->startOfDay()->lte(now()->endOfDay()) || $lastMark->isToday();
+        })->count();
+    }
+
+    public function getWeekCompletedPercentage(): int
+    {
+        $weekStart = now()->startOfWeek();
+        $weekEnd = now()->endOfWeek();
+
+        $completions = DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->whereBetween('ch.MarcaCumplimiento', [$weekStart, $weekEnd])
+            ->count();
+
+        $fails = DB::table('fallo_habito as f')
+            ->join('habito as h', 'h.ID_Habito', '=', 'f.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->whereBetween('f.MarcaFallo', [$weekStart, $weekEnd])
+            ->count();
+
+        $total = $completions + $fails;
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        return (int) round(($completions / $total) * 100);
+    }
+
+    public function getHeatmapStart(): Carbon
+    {
+        return now()->copy()->startOfWeek()->subWeeks(11);
+    }
+
+    public function getHeatmapData(): array
+    {
+        $start = $this->getHeatmapStart();
+        $end = now();
+
+        $counts = DB::table('cumplimiento_habito as ch')
+            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
+            ->where('h.Usuario_ID', $this->ID_Usuario)
+            ->where('ch.MarcaCumplimiento', '>=', $start)
+            ->selectRaw('DATE(ch.MarcaCumplimiento) as dia, COUNT(DISTINCT ch.Habito_ID) as n')
+            ->groupBy('dia')
+            ->pluck('n', 'dia')
+            ->all();
+
+        $data = [];
+
+        for ($day = $start->copy(); $day->lte($end); $day->addDay()) {
+            $data[$day->format('Y-m-d')] = (int) ($counts[$day->format('Y-m-d')] ?? 0);
+        }
+
+        return $data;
+    }
+
+    public function getTotalHabitCount(): int
+    {
+        return $this->habitos()->count();
     }
 }
