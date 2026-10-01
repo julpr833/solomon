@@ -33,6 +33,8 @@
         { text: "La disciplina es el puente entre las metas y los logros.", ref: "Jim Rohn" }
     ];
 
+    var refreshBtnTimeout = -1;
+
     const motivationDisabledClasses = [
         'bg-white', 'border-2', 'border-dashed', 'border-line', 'shadow-none', 'text-ink-light'
     ];
@@ -59,13 +61,11 @@
         const refreshBtn = document.getElementById('motivation-refresh');
         const refreshIcon = document.getElementById('motivation-refresh-icon');
 
+
         if (!card) return;
 
-        const provSaved = localStorage.getItem('proverbiosBiblicos');
-        const quoteSaved = localStorage.getItem('frasesMotivacionales');
-
-        const showProverbs = provSaved === null ? true : provSaved === 'true';
-        const showQuotes = quoteSaved === null ? true : quoteSaved === 'true';
+        const showProverbs = {{ auth()->user()?->wantsProverbios() ? 'true' : 'false' }};
+        const showQuotes = {{ auth()->user()?->wantsFrases() ? 'true' : 'false' }};
 
         if (!showProverbs && !showQuotes) {
             setMotivationDisabled(card, tag, quoteEl, sourceEl, true);
@@ -110,9 +110,18 @@
         if (refreshBtn) {
             refreshBtn.onclick = () => {
                 if (refreshIcon) {
+                    if (refreshBtnTimeout != -1)
+                        clearTimeout(refreshBtnTimeout);
                     refreshIcon.classList.remove('animate-spin');
+                    quoteEl.classList.remove('animate-fade-in');
                     void refreshIcon.offsetWidth;
                     refreshIcon.classList.add('animate-spin');
+                    quoteEl.classList.add('animate-fade-in');
+                    refreshBtnTimeout = setTimeout(() => {
+                        refreshIcon.classList.remove('animate-spin');
+                        quoteEl.classList.remove('animate-fade-in');
+                    }, 1000);
+                    console.log(refreshBtnTimeout);
                 }
                 initMotivation();
             };
