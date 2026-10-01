@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
 
     // --- Rutas de Configuración ---
     Route::get('/configuracion', [SettingsController::class, 'settings'])->name('settings');
+    Route::patch('/configuracion/preferencias', [SettingsController::class, 'updatePreferences'])->name('settings.preferences');
 
     // --- Rutas de Hábitos ---
     Route::get('/dashboard', [HabitsController::class, 'dashboard'])->name('dashboard');
