@@ -62,7 +62,7 @@
                 <div class="text-sm font-medium">Proverbios bíblicos</div>
                 <div class="text-xs text-ink-light">Mensajes del libro de Proverbios</div>
             </div>
-            <input type="checkbox" id="toggle-proverbs" class="peer sr-only" checked>
+            <input type="checkbox" id="toggle-proverbs" class="peer sr-only" @checked(auth()->user()?->wantsProverbios())>
             <span
                 class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
         </label>
@@ -71,7 +71,7 @@
                 <div class="text-sm font-medium">Frases motivacionales</div>
                 <div class="text-xs text-ink-light">Frases de autores varios</div>
             </div>
-            <input type="checkbox" id="toggle-quotes" class="peer sr-only" checked>
+            <input type="checkbox" id="toggle-quotes" class="peer sr-only" @checked(auth()->user()?->wantsFrases())>
             <span
                 class="relative h-5 w-10 shrink-0 rounded-full bg-line transition-colors duration-200 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-brand-50 peer-checked:after:translate-x-5"></span>
         </label>
@@ -104,30 +104,29 @@
 
 @section('scripts')
     <script>
-        const toggles = [
-            { id: 'toggle-whatsapp', key: 'recordatoriosWhatsapp', defaultValue: true },
-            { id: 'toggle-goals-congrats', key: 'felicitarMetas', defaultValue: true },
-            { id: 'toggle-proverbs', key: 'proverbiosBiblicos', defaultValue: true },
-            { id: 'toggle-quotes', key: 'frasesMotivacionales', defaultValue: true }
-        ];
-
         document.addEventListener('DOMContentLoaded', () => {
-            toggles.forEach(t => {
-                const element = document.getElementById(t.id);
-                if (!element) return;
-
-                const savedVal = localStorage.getItem(t.key);
-                element.checked = savedVal === null ? t.defaultValue : savedVal === 'true';
-
-                if (t.id === 'toggle-whatsapp') updateWhatsappPanel(element.checked);
-
-                element.addEventListener('change', () => {
-                    localStorage.setItem(t.key, String(element.checked));
-                    if (t.id === 'toggle-whatsapp') updateWhatsappPanel(element.checked);
-                });
-            });
-
+            const provToggle = document.getElementById('toggle-proverbs');
+            const quoteToggle = document.getElementById('toggle-quotes');
             const phoneInput = document.getElementById('phone');
+
+            const savePreferences = () => {
+                fetch('{{ route('settings.preferences') }}', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        proverbios: provToggle.checked,
+                        frases: quoteToggle.checked,
+                    }),
+                });
+            };
+
+            if (provToggle) provToggle.addEventListener('change', savePreferences);
+            if (quoteToggle) quoteToggle.addEventListener('change', savePreferences);
+
             if (phoneInput) {
                 const savedPhone = localStorage.getItem('whatsappPhone');
                 if (savedPhone !== null) phoneInput.value = savedPhone;
@@ -137,10 +136,5 @@
                 });
             }
         });
-
-        function updateWhatsappPanel(visible) {
-            const panel = document.getElementById('whatsapp-options-panel');
-            if (panel) panel.style.display = visible ? 'block' : 'none';
-        }
     </script>
 @endsection
