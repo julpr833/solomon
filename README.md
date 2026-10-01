@@ -84,7 +84,7 @@ choco install php composer nodejs-lts pnpm mysql
 scoop install php composer nodejs-lts pnpm mysql
 
 # Clone and enter the project
-git clone [<repo-url>](https://github.com/julpr833/solomon.git) && cd solomon
+git clone https://github.com/julpr833/solomon.git && cd solomon
 
 # Install dependencies
 composer install
