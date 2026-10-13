@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class SignupRequest extends FormRequest
@@ -49,21 +48,17 @@ class SignupRequest extends FormRequest
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
             'name.max' => 'El nombre no puede superar los 255 caracteres.',
-
             // Gender
             'gender.required' => 'El género es obligatorio.',
             'gender.in' => 'El género seleccionado no es válido.',
-
             // Email
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'Ingresá un correo electrónico válido.',
             'email.max' => 'El correo electrónico no puede superar los 255 caracteres.',
             'email.unique' => 'Este correo electrónico ya está registrado.',
-
             // Telefono
             'telefono.string' => 'El teléfono debe ser una cadena de texto.',
             'telefono.max' => 'El teléfono no puede superar los 20 caracteres.',
-
             // Password
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'Las contraseñas no coinciden.',

@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UsersController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\HabitsController;
 use App\Http\Controllers\GoalsController;
+use App\Http\Controllers\HabitsController;
 use App\Http\Controllers\RewardsController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UsersController;
+use Illuminate\Support\Facades\Route;
 
 // --- Rutas de Inicio ---
 // Redirigimos /index y /home a la raíz (/) o apuntamos todas al mismo método

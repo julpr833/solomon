@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Recordatorio extends Model
 {
-    public $table = "recordatorio";
+    protected $table = 'recordatorio';
 
     public function habito(): BelongsTo
     {
-        return $this->belongsTo(Habito::class, "ID_Habito", "ID_Habito");
+        return $this->belongsTo(Habito::class, 'ID_Habito', 'ID_Habito');
     }
 }

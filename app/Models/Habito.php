@@ -9,36 +9,37 @@ use Illuminate\Support\Facades\DB;
 
 class Habito extends Model
 {
-    public $table = "habito";
+    public $table = 'habito';
+
     protected $primaryKey = 'ID_Habito';
 
     public function recordatorios(): HasMany
     {
-        return $this->hasMany(Recordatorio::class, "ID_Habito", "ID_Habito");
+        return $this->hasMany(Recordatorio::class, 'ID_Habito', 'ID_Habito');
     }
 
     public function usuario(): BelongsTo
     {
-        return $this->belongsTo(User::class, "ID_Usuario", "Usuario_ID");
+        return $this->belongsTo(User::class, 'ID_Usuario', 'Usuario_ID');
     }
 
     public function metas(): HasMany
     {
-        return $this->hasMany(Meta::class, "Habito_ID", "ID_Habito");
+        return $this->hasMany(Meta::class, 'Habito_ID', 'ID_Habito');
     }
 
     public function cumplimientos(): HasMany
     {
         return $this->hasMany(
             CumplimientoHabito::class,
-            "Habito_ID",
-            "ID_Habito",
+            'Habito_ID',
+            'ID_Habito',
         );
     }
 
     public function fallos(): HasMany
     {
-        return $this->hasMany(FalloHabito::class, "Habito_ID", "ID_Habito");
+        return $this->hasMany(FalloHabito::class, 'Habito_ID', 'ID_Habito');
     }
 
     public function getCurrentRacha(): int
@@ -49,7 +50,7 @@ class Habito extends Model
             ->orderByDesc('MarcaCumplimiento')
             ->first();
 
-        if (!$lastCompletion) {
+        if (! $lastCompletion) {
             return 0;
         }
 

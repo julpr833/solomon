@@ -4,27 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create("recompensas_meta", function (Blueprint $table) {
+        Schema::create('recompensas_meta', function (Blueprint $table) {
             $table
-                ->foreignId("Habito_ID")
-                ->constrained("habito", "ID_Habito")
-                ->onDelete("cascade");
-            $table->smallInteger("RachaRequerida");
+                ->foreignId('Habito_ID')
+                ->constrained('habito', 'ID_Habito')
+                ->onDelete('cascade');
+            $table->smallInteger('RachaRequerida');
             $table
-                ->foreign("RachaRequerida")
-                ->references("RachaRequerida")
-                ->on("meta")
-                ->onDelete("cascade");
+                ->foreign('RachaRequerida')
+                ->references('RachaRequerida')
+                ->on('meta')
+                ->onDelete('cascade');
             $table
-                ->foreignId("Recompensa_ID")
-                ->constrained("recompensa", "ID_Recompensa")
-                ->onDelete("cascade");
+                ->foreignId('Recompensa_ID')
+                ->constrained('recompensa', 'ID_Recompensa')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -34,6 +35,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("recompensas_meta");
+        Schema::dropIfExists('recompensas_meta');
     }
 };

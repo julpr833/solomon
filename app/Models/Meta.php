@@ -8,20 +8,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Meta extends Model
 {
-    public $table = "meta";
+    public $table = 'meta';
 
     public function recompensas(): BelongsToMany
     {
         return $this->belongsToMany(
             Recompensa::class,
-            "RECOMPENSAS_META",
-            "Habito_ID",
-            "Recompensa_ID",
+            'RECOMPENSAS_META',
+            'Habito_ID',
+            'Recompensa_ID',
         );
     }
 
     public function habito(): BelongsTo
     {
-        return $this->belongsTo(Habito::class, "ID_Habito", "Habito_ID");
+        return $this->belongsTo(Habito::class, 'ID_Habito', 'Habito_ID');
     }
 }

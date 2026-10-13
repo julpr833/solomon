@@ -36,7 +36,7 @@ class UsersController extends Controller
     public function loginStore(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
-        if (!Auth::attempt($credentials)) {
+        if (! Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales ingresadas son incorrectas.'],
             ]);
@@ -55,8 +55,8 @@ class UsersController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'Sexo' => $request->gender,
-                'Avatar_URL' => "https://api.dicebear.com/10.x/shadows/svg?backgroundColor=16161a&inkColor=e6e2dd,d8dfe6,e6dde2,dee6d8&seed=" . $request->name,
-                'telefono' => $request->telefono ?? null
+                'Avatar_URL' => 'https://api.dicebear.com/10.x/shadows/svg?backgroundColor=16161a&inkColor=e6e2dd,d8dfe6,e6dde2,dee6d8&seed='.$request->name,
+                'telefono' => $request->telefono ?? null,
             ]);
         });
 

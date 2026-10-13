@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,55 +15,57 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(["NombreUsuario", "email", "password", "Avatar_URL", "Sexo", "telefono"])]
-#[Hidden(["password", "remember_token"])]
+#[Fillable(['NombreUsuario', 'email', 'password', 'Avatar_URL', 'Sexo', 'telefono'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-    public $table = "users";
+
+    protected $table = 'users';
+
     protected $primaryKey = 'ID_Usuario';
 
     public function habitos(): HasMany
     {
-        return $this->hasMany(Habito::class, "Usuario_ID", "ID_Usuario");
+        return $this->hasMany(Habito::class, 'Usuario_ID', 'ID_Usuario');
     }
 
     public function preferencias(): HasOne
     {
         return $this->hasOne(
             PreferenciasUsuario::class,
-            "Usuario_ID",
-            "ID_Usuario",
+            'Usuario_ID',
+            'ID_Usuario',
         );
     }
 
-    public function updatePreferences(array $attributes): PreferenciasUsuario
+    public function updatePreferences(array $attributes): Model
     {
         return $this->preferencias()->updateOrCreate(
-            ["Usuario_ID" => $this->ID_Usuario],
+            ['Usuario_ID' => $this->ID_Usuario],
             $attributes,
         );
     }
 
     public function getContenidoMotivacional(): string
     {
-        return $this->preferencias?->ContenidoMotivacional ?? "Ambos";
+        return $this->preferencias->ContenidoMotivacional ?? 'Ambos';
     }
 
     public function wantsProverbios(): bool
     {
-        return in_array($this->getContenidoMotivacional(), ["Proverbios", "Ambos"], true);
+        return in_array($this->getContenidoMotivacional(), ['Proverbios', 'Ambos'], true);
     }
 
     public function wantsFrases(): bool
     {
-        return in_array($this->getContenidoMotivacional(), ["Frases", "Ambos"], true);
+        return in_array($this->getContenidoMotivacional(), ['Frases', 'Ambos'], true);
     }
 
     public function recompensas(): HasMany
     {
-        return $this->hasMany(Recompensa::class, "Usuario_ID", "ID_Usuario");
+        return $this->hasMany(Recompensa::class, 'Usuario_ID', 'ID_Usuario');
     }
 
     /**
@@ -73,8 +76,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
     }
 
@@ -102,7 +105,7 @@ class User extends Authenticatable
             ->orderByDesc('f.MarcaFallo')
             ->first();
 
-        if (!$lastCompletion) {
+        if (! $lastCompletion) {
             return 0;
         }
 
@@ -135,7 +138,7 @@ class User extends Authenticatable
         return $this->habitos()->get()->filter(function (Habito $habit) use ($lastCompletions) {
             $lastMark = $lastCompletions[$habit->ID_Habito] ?? null;
 
-            if (!$lastMark) {
+            if (! $lastMark) {
                 return true;
             }
 
@@ -145,8 +148,7 @@ class User extends Authenticatable
                 'Pluridiaria', 'Daria' => $lastMark->copy()->addDay(),
                 'Semanal' => $lastMark->copy()->addWeek(),
                 'Mensual' => $lastMark->copy()->addMonth(),
-                'Anual' => $lastMark->copy()->addYear(),
-                default => $lastMark->copy()->addDay(),
+                'Anual' => $lastMark->copy()->addYear()
             };
 
             return $next->startOfDay()->lte(now()->endOfDay()) || $lastMark->isToday();
