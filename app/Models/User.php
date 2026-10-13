@@ -128,31 +128,31 @@ class User extends Authenticatable
 
     public function getTodaysHabitCount(): int
     {
-        $lastCompletions = DB::table('cumplimiento_habito as ch')
-            ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
-            ->where('h.Usuario_ID', $this->ID_Usuario)
-            ->groupBy('ch.Habito_ID')
-            ->select('ch.Habito_ID', DB::raw('MAX(ch.MarcaCumplimiento) as ultima_marca'))
-            ->pluck('ultima_marca', 'ch.Habito_ID');
-
-        return $this->habitos()->get()->filter(function (Habito $habit) use ($lastCompletions) {
-            $lastMark = $lastCompletions[$habit->ID_Habito] ?? null;
-
-            if (! $lastMark) {
-                return true;
-            }
-
-            $lastMark = Carbon::parse($lastMark);
-
-            $next = match ($habit->Frecuencia) {
-                'Pluridiaria', 'Daria' => $lastMark->copy()->addDay(),
-                'Semanal' => $lastMark->copy()->addWeek(),
-                'Mensual' => $lastMark->copy()->addMonth(),
-                'Anual' => $lastMark->copy()->addYear()
-            };
-
-            return $next->startOfDay()->lte(now()->endOfDay()) || $lastMark->isToday();
-        })->count();
+        return $this->habitos()
+            ->leftJoin('cumplimiento_habito as ch', function ($join) {
+                $join->on('habito.ID_Habito', '=', 'ch.Habito_ID')
+                    ->whereRaw('ch.MarcaCumplimiento = (
+                     SELECT MAX(sub.MarcaCumplimiento) 
+                     FROM cumplimiento_habito sub 
+                     WHERE sub.Habito_ID = habito.ID_Habito
+                 )');
+            })
+            ->where(function ($query) {
+                // Case 1: Habit has never been completed
+                $query->whereNull('ch.MarcaCumplimiento')
+                    // Case 2: Last completion was today
+                    ->orWhereDate('ch.MarcaCumplimiento', '=', now())
+                    // Case 3: Next due date is today or in the past
+                    ->orWhereRaw("
+                    CASE habito.Frecuencia
+                        WHEN 'Pluridiaria' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 DAY)
+                        WHEN 'Diaria' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 DAY)
+                        WHEN 'Semanal' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 WEEK)
+                        WHEN 'Mensual' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 MONTH)
+                        WHEN 'Anual' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 YEAR)
+                    END <= ?", [now()->endOfDay()]);
+            })
+            ->count('habito.ID_Habito');
     }
 
     public function getWeekCompletedPercentage(): int
