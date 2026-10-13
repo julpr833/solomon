@@ -51,6 +51,12 @@
             "Composer\\Config::disableProcessTimeout",
             "pnpm concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"pnpm run dev\" --names='server,queue,vite'"
         ],
+        "qualitycheck": [
+            "vendor/bin/pint",
+            "vendor/bin/phpstan analyse --memory-limit=1g",
+            "php artisan insights",
+            "php artisan test"
+        ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
