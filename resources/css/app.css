@@ -5,6 +5,10 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@view-transition {
+    navigation: auto;
+}
+
 @theme {
     --font-sans:
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
@@ -67,10 +71,41 @@
         display: block;
     }
 
-.avatar-lg {
+    .avatar-lg {
         width: 4rem;
         height: 4rem;
         font-size: 1.5rem;
+    }
+
+    .input-saved-pulse {
+        animation: input-saved-pulse 1s ease-out;
+    }
+
+    @keyframes input-saved-pulse {
+        0% {
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4);
+        }
+        60% {
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.15);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    .toast-saved {
+        animation: toast-saved 0.25s ease-out;
+    }
+
+    @keyframes toast-saved {
+        from {
+            opacity: 0;
+            transform: translateY(4px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
     .modal-backdrop {

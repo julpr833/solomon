@@ -30,4 +30,11 @@ class SettingsController extends Controller
 
         return response()->json(['contenido' => $contenido]);
     }
+
+    public function updateBiography(Request $request)
+    {
+        $data = $request->validate(['biografia' => ['required', 'string', 'max:300']]);
+
+        $request->user()->updateBiography($data['biografia']);
+    }
 }

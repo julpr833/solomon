@@ -47,11 +47,15 @@
                 </div>
             </div>
         </div>
-        <div class="mb-0">
+        <div class="relative mb-0">
             <label for="bio" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Biografía</label>
             <textarea id="bio" name="biografia"
                 class="block w-full resize-y min-h-20 px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                placeholder="Cuenta algo sobre ti..."></textarea>
+                placeholder="Cuenta algo sobre ti...">{{ $settingUser?->Biografia }}</textarea>
+            <div id="bioSaved"
+                class="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1 rounded-md bg-green px-2.5 py-1 text-[11px] font-semibold text-white shadow-card">
+                <i class="ti ti-check"></i> Guardado
+            </div>
         </div>
     </div>
 
@@ -108,6 +112,9 @@
             const provToggle = document.getElementById('toggle-proverbs');
             const quoteToggle = document.getElementById('toggle-quotes');
             const phoneInput = document.getElementById('phone');
+            const biography = document.getElementById('bio');
+
+            var biographySaveTimer = null;
 
             const savePreferences = () => {
                 fetch('{{ route('settings.preferences') }}', {
@@ -124,8 +131,72 @@
                 });
             };
 
+            const bioSaved = document.getElementById('bioSaved');
+            let bioSavedTimer = null;
+            let lastSavedBiography = bio ? bio.value : null;
+
+            const pulseBiography = () => {
+                if (!bio) return;
+                bio.classList.remove('input-saved-pulse');
+                void bio.offsetWidth;
+                bio.classList.add('input-saved-pulse');
+            };
+
+            if (bio) {
+                bio.addEventListener('animationend', (event) => {
+                    if (event.animationName === 'input-saved-pulse') {
+                        bio.classList.remove('input-saved-pulse');
+                    }
+                });
+            }
+
+            const showBiographySaved = () => {
+                if (!bioSaved) return;
+                clearTimeout(bioSavedTimer);
+                bioSaved.classList.remove('hidden', 'toast-saved');
+                bioSaved.classList.add('flex');
+                void bioSaved.offsetWidth;
+                bioSaved.classList.add('toast-saved');
+                bioSavedTimer = setTimeout(() => {
+                    bioSaved.classList.add('hidden');
+                    bioSaved.classList.remove('flex', 'toast-saved');
+                }, 2000);
+            };
+
+            const saveBiography = () => {
+
+                if (biographySaveTimer)
+                    clearTimeout(biographySaveTimer)
+
+                biographySaveTimer = setTimeout(() => {
+                    const value = bio.value;
+
+                    if (value === lastSavedBiography)
+                        return;
+
+                    fetch('{{ route('settings.biography') }}', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            biografia: value,
+                        }),
+                    }).then((response) => {
+                        if (response.ok) {
+                            lastSavedBiography = value;
+                            pulseBiography();
+                            showBiographySaved();
+                        }
+                    });
+                }, 1000);
+            };
+
             if (provToggle) provToggle.addEventListener('change', savePreferences);
             if (quoteToggle) quoteToggle.addEventListener('change', savePreferences);
+            if (bio) bio.addEventListener('input', saveBiography);
 
             if (phoneInput) {
                 const savedPhone = localStorage.getItem('whatsappPhone');
