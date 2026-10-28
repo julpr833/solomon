@@ -14,6 +14,7 @@
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
+        "baer-software/larabeacon": "^3.0",
         "fakerphp/faker": "^1.23",
         "fruitcake/laravel-debugbar": "^4.4",
         "larastan/larastan": "^3.13",
@@ -49,12 +50,13 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "pnpm concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"pnpm run dev\" --names='server,queue,vite'"
+            "pnpm concurrently -c \"#93c5fd,#c4b5fd,#fdba74,#86efac\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan schedule:work\" \"pnpm run dev\" --names='server,queue,scheduler,vite'"
         ],
         "qualitycheck": [
             "vendor/bin/pint",
             "vendor/bin/phpstan analyse --memory-limit=1g",
             "php artisan insights",
+            "php artisan larabeacon",
             "php artisan test"
         ],
         "test": [
