@@ -31,13 +31,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/configuracion', [SettingsController::class, 'settings'])->name('settings');
     Route::patch('/configuracion/preferencias', [SettingsController::class, 'updatePreferences'])->name('settings.preferences');
     Route::patch('/configuracion/biografia', [SettingsController::class, 'updateBiography'])->name('settings.biography');
+    Route::patch('/configuracion/telefono', [SettingsController::class, 'updatePhone'])->name('settings.phone');
+    Route::post('/configuracion/whatsapp/probar', [SettingsController::class, 'testWhatsApp'])->name('settings.whatsapp.test');
 
     // --- Rutas de Hábitos ---
     Route::get('/dashboard', [HabitsController::class, 'dashboard'])->name('dashboard');
     Route::get('/habito/{id}', [HabitsController::class, 'show'])->name('habit');
     Route::post('/habito/crear', [HabitsController::class, 'create'])->name('habit.create');
-    Route::patch('/habito/editar', [HabitsController::class, 'edit'])->name('habit.edit');
-    Route::delete('/habito/eliminar', [HabitsController::class, 'delete'])->name('habit.delete');
+    Route::post('/habito/{id}/completar', [HabitsController::class, 'complete'])->name('habit.complete');
+    Route::delete('/habito/{id}/completar', [HabitsController::class, 'uncomplete'])->name('habit.uncomplete');
+    Route::patch('/habito/editar/{habito?}', [HabitsController::class, 'edit'])->name('habit.edit');
+    Route::delete('/habito/eliminar/{habito?}', [HabitsController::class, 'delete'])->name('habit.delete');
 
     // --- Rutas de Metas ---
     Route::get('/metas', [GoalsController::class, 'index'])->name('goals');
