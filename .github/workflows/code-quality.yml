@@ -1,0 +1,34 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [master, development]
+  pull_request:
+    branches: [master, development]
+
+jobs:
+  quality-assurance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar entorno PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, dom, fileinfo, mysql
+          coverage: none
+
+      - name: Instalar dependencias de Composer
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Verificar estilo con Laravel Pint
+        run: vendor/bin/pint --test
+
+      - name: Análisis estático con Larastan
+        run: vendor/bin/phpstan analyse
+
+      - name: Análisis de métricas con PHP Insights
+        run: php artisan insights --no-interaction --min-quality=90

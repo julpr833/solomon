@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proverbio extends Model
 {
-    public $table = "proverbio";
+    public $table = 'proverbio';
+
+    protected $fillable = ['Proverbio', 'Capitulo', 'Versiculo'];
 }

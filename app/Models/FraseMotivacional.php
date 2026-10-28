@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FraseMotivacional extends Model
 {
-    public $table = "frase_motivacional";
+    public $table = 'frase_motivacional';
+
+    protected $fillable = ['Frase', 'Fuente', 'Anio'];
 }
