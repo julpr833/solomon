@@ -20,7 +20,7 @@ class RewardsController extends Controller
         $request->user()->recompensas()->create([
             'Nombre' => $data['nombre'],
             'Descripcion' => $data['descripcion'] ?? null,
-            'Emoji' => $data['emoji'] ?: '🏆',
+            'Emoji' => $data['emoji'] ?? '🏆',
         ]);
 
         return redirect()->route('goals')->with('status', 'Recompensa creada con éxito.');
@@ -46,7 +46,7 @@ class RewardsController extends Controller
         $recompensa->update([
             'Nombre' => $data['nombre'],
             'Descripcion' => $data['descripcion'] ?? null,
-            'Emoji' => $data['emoji'] ?: '🏆',
+            'Emoji' => $data['emoji'] ?? '🏆',
         ]);
 
         return redirect()->route('goals')->with('status', 'Recompensa actualizada con éxito.');

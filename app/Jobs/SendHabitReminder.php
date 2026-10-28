@@ -86,6 +86,8 @@ class SendHabitReminder implements ShouldBeUnique, ShouldQueue
 
     private function message(Recordatorio $reminder): string
     {
-        return $reminder->Mensaje ?: '⏰ Recordatorio: '.$reminder->habito->Objetivo;
+        $message = $reminder->Mensaje;
+
+        return filled($message) ? $message : '⏰ Recordatorio: '.$reminder->habito->Objetivo;
     }
 }

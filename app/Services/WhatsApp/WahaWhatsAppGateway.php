@@ -4,6 +4,7 @@ namespace App\Services\WhatsApp;
 
 use App\Contracts\WhatsAppGateway;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -37,9 +38,7 @@ class WahaWhatsAppGateway implements WhatsAppGateway
         }
 
         if ($response->failed()) {
-            throw new WhatsAppException(
-                'WAHA respondió con error '.$response->status().': '.$this->errorDetail($response->json('message') ?? $response->body()),
-            );
+            $this->throwRequestError($response);
         }
     }
 
@@ -60,9 +59,7 @@ class WahaWhatsAppGateway implements WhatsAppGateway
             ]);
 
         if ($response->failed()) {
-            throw new WhatsAppException(
-                'WAHA respondió con error '.$response->status().': '.$this->errorDetail($response->json('message') ?? $response->body()),
-            );
+            $this->throwRequestError($response);
         }
 
         if (! $response->json('numberExists')) {
@@ -77,6 +74,15 @@ class WahaWhatsAppGateway implements WhatsAppGateway
     private function url(string $path): string
     {
         return rtrim($this->baseUrl, '/').$path;
+    }
+
+    private function throwRequestError(Response $response): never
+    {
+        $detail = $response->json('message') ?? $response->body();
+
+        throw new WhatsAppException(
+            'WAHA respondió con error '.$response->status().': '.$this->errorDetail($detail),
+        );
     }
 
     private function errorDetail(mixed $detail): string

@@ -205,7 +205,7 @@ class User extends Authenticatable
             return 0;
         }
 
-        return (int) round(($completions / $total) * 100);
+        return (int) round($completions / $total * 100);
     }
 
     public function getHeatmapStart(): Carbon
@@ -229,8 +229,13 @@ class User extends Authenticatable
 
         $data = [];
 
-        for ($day = $start->copy(); $day->lte($end); $day->addDay()) {
-            $data[$day->format('Y-m-d')] = (int) ($counts[$day->format('Y-m-d')] ?? 0);
+        $day = $start->copy();
+
+        while ($day->lte($end)) {
+            $key = $day->format('Y-m-d');
+            $data[$key] = (int) ($counts[$key] ?? 0);
+
+            $day->addDay();
         }
 
         return $data;
