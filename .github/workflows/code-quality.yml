@@ -17,18 +17,18 @@ jobs:
       - name: Configurar entorno PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: mbstring, dom, fileinfo, mysql
           coverage: none
 
       - name: Instalar dependencias de Composer
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Verificar estilo con Laravel Pint
         run: vendor/bin/pint --test
 
       - name: Análisis estático con Larastan
-        run: vendor/bin/phpstan analyse
+        run: vendor/bin/phpstan analyse --memory-limit=1g
 
       - name: Análisis de métricas con PHP Insights
         run: php artisan insights --no-interaction --min-quality=90
