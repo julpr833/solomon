@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
@@ -27,7 +28,7 @@ class SignupRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:M,F'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'telefono' => ['nullable', 'string', 'max:15'],
+            'telefono' => ['nullable', 'string', 'max:20', 'regex:'.PhoneNumber::E164_REGEX],
             'password' => [
                 'required',
                 'confirmed', // Exige que exista el campo 'password_confirmation'
@@ -39,6 +40,13 @@ class SignupRequest extends FormRequest
                     ->uncompromised(),
             ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'telefono' => PhoneNumber::normalize($this->input('telefono')),
+        ]);
     }
 
     public function messages(): array
@@ -59,6 +67,7 @@ class SignupRequest extends FormRequest
             // Telefono
             'telefono.string' => 'El teléfono debe ser una cadena de texto.',
             'telefono.max' => 'El teléfono no puede superar los 20 caracteres.',
+            'telefono.regex' => 'Ingresá el teléfono en formato internacional, por ejemplo +5491123456789.',
             // Password
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
