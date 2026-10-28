@@ -11,6 +11,6 @@ class FalloHabito extends Model
 
     public function habito(): BelongsTo
     {
-        return $this->belongsTo(Habito::class, 'ID_Habito', 'Habito_ID');
+        return $this->belongsTo(Habito::class, 'Habito_ID', 'ID_Habito');
     }
 }

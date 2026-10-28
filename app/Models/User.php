@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['NombreUsuario', 'email', 'password', 'Avatar_URL', 'Sexo', 'telefono'])]
+#[Fillable(['NombreUsuario', 'email', 'password', 'Avatar_URL', 'Sexo', 'telefono', 'Biografia'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -26,11 +27,13 @@ class User extends Authenticatable
 
     protected $primaryKey = 'ID_Usuario';
 
+    /** @return HasMany<Habito, $this> */
     public function habitos(): HasMany
     {
         return $this->hasMany(Habito::class, 'Usuario_ID', 'ID_Usuario');
     }
 
+    /** @return HasOne<PreferenciasUsuario, $this> */
     public function preferencias(): HasOne
     {
         return $this->hasOne(
@@ -48,6 +51,11 @@ class User extends Authenticatable
         );
     }
 
+    public function updateBiography(string $biography): bool
+    {
+        return $this->update(['Biografia' => $biography]);
+    }
+
     public function getContenidoMotivacional(): string
     {
         return $this->preferencias->ContenidoMotivacional ?? 'Ambos';
@@ -63,6 +71,7 @@ class User extends Authenticatable
         return in_array($this->getContenidoMotivacional(), ['Frases', 'Ambos'], true);
     }
 
+    /** @return HasMany<Recompensa, $this> */
     public function recompensas(): HasMany
     {
         return $this->hasMany(Recompensa::class, 'Usuario_ID', 'ID_Usuario');
@@ -89,8 +98,30 @@ class User extends Authenticatable
             ->max('ch.RachaAlCumplir') ?? 0;
     }
 
-    public function getCurrentRacha(): int
+    /**
+     * @param  Collection<int, Habito>|null  $habitos
+     */
+    public function getCurrentRacha(?Collection $habitos = null): int
     {
+        if ($habitos !== null) {
+            $lastCompletion = $habitos
+                ->filter(fn (Habito $habito): bool => (bool) $habito->ultimo_cumplimiento)
+                ->sortByDesc('ultimo_cumplimiento')
+                ->first();
+
+            if (! $lastCompletion) {
+                return 0;
+            }
+
+            $lastFailure = $habitos->pluck('ultimo_fallo')->filter()->max();
+
+            if ($lastFailure && $lastFailure > $lastCompletion->ultimo_cumplimiento) {
+                return 0;
+            }
+
+            return (int) ($lastCompletion->ultima_racha ?? 0);
+        }
+
         $lastCompletion = DB::table('cumplimiento_habito as ch')
             ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
             ->where('h.Usuario_ID', $this->ID_Usuario)
@@ -116,8 +147,15 @@ class User extends Authenticatable
         return (int) $lastCompletion->RachaAlCumplir;
     }
 
-    public function getTodaysCompletedHabits(): int
+    /**
+     * @param  Collection<int, Habito>|null  $habitos
+     */
+    public function getTodaysCompletedHabits(?Collection $habitos = null): int
     {
+        if ($habitos !== null) {
+            return $habitos->filter(fn (Habito $habito): bool => $habito->isCompletedToday())->count();
+        }
+
         return DB::table('cumplimiento_habito as ch')
             ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
             ->where('h.Usuario_ID', $this->ID_Usuario)
@@ -126,33 +164,14 @@ class User extends Authenticatable
             ->count('ch.Habito_ID');
     }
 
-    public function getTodaysHabitCount(): int
+    /**
+     * @param  Collection<int, Habito>|null  $habitos
+     */
+    public function getTodaysHabitCount(?Collection $habitos = null): int
     {
-        return $this->habitos()
-            ->leftJoin('cumplimiento_habito as ch', function ($join) {
-                $join->on('habito.ID_Habito', '=', 'ch.Habito_ID')
-                    ->whereRaw('ch.MarcaCumplimiento = (
-                     SELECT MAX(sub.MarcaCumplimiento) 
-                     FROM cumplimiento_habito sub 
-                     WHERE sub.Habito_ID = habito.ID_Habito
-                 )');
-            })
-            ->where(function ($query) {
-                // Case 1: Habit has never been completed
-                $query->whereNull('ch.MarcaCumplimiento')
-                    // Case 2: Last completion was today
-                    ->orWhereDate('ch.MarcaCumplimiento', '=', now())
-                    // Case 3: Next due date is today or in the past
-                    ->orWhereRaw("
-                    CASE habito.Frecuencia
-                        WHEN 'Pluridiaria' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 DAY)
-                        WHEN 'Diaria' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 DAY)
-                        WHEN 'Semanal' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 WEEK)
-                        WHEN 'Mensual' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 MONTH)
-                        WHEN 'Anual' THEN DATE_ADD(ch.MarcaCumplimiento, INTERVAL 1 YEAR)
-                    END <= ?", [now()->endOfDay()]);
-            })
-            ->count('habito.ID_Habito');
+        $habitos ??= $this->habitos()->withProgress()->get();
+
+        return $habitos->filter(fn (Habito $habito): bool => $habito->isDueToday())->count();
     }
 
     public function getWeekCompletedPercentage(): int
@@ -160,17 +179,25 @@ class User extends Authenticatable
         $weekStart = now()->startOfWeek();
         $weekEnd = now()->endOfWeek();
 
-        $completions = DB::table('cumplimiento_habito as ch')
+        $completionsQuery = DB::table('cumplimiento_habito as ch')
             ->join('habito as h', 'h.ID_Habito', '=', 'ch.Habito_ID')
             ->where('h.Usuario_ID', $this->ID_Usuario)
             ->whereBetween('ch.MarcaCumplimiento', [$weekStart, $weekEnd])
-            ->count();
+            ->selectRaw('COUNT(*)');
 
-        $fails = DB::table('fallo_habito as f')
+        $failsQuery = DB::table('fallo_habito as f')
             ->join('habito as h', 'h.ID_Habito', '=', 'f.Habito_ID')
             ->where('h.Usuario_ID', $this->ID_Usuario)
             ->whereBetween('f.MarcaFallo', [$weekStart, $weekEnd])
-            ->count();
+            ->selectRaw('COUNT(*)');
+
+        $totals = DB::query()
+            ->selectSub($completionsQuery, 'completions')
+            ->selectSub($failsQuery, 'fails')
+            ->first();
+
+        $completions = (int) $totals->completions;
+        $fails = (int) $totals->fails;
 
         $total = $completions + $fails;
 
@@ -209,8 +236,28 @@ class User extends Authenticatable
         return $data;
     }
 
-    public function getTotalHabitCount(): int
+    /**
+     * @param  Collection<int, Habito>|null  $habitos
+     */
+    public function getTotalHabitCount(?Collection $habitos = null): int
     {
-        return $this->habitos()->count();
+        return $habitos?->count() ?? $this->habitos()->count();
+    }
+
+    /**
+     * @param  Collection<int, Habito>  $habitos
+     * @return array<string, mixed>
+     */
+    public function getDashboardStats(Collection $habitos): array
+    {
+        return [
+            'today_completed' => $this->getTodaysCompletedHabits($habitos),
+            'today_total' => $this->getTodaysHabitCount($habitos),
+            'current_streak' => $this->getCurrentRacha($habitos),
+            'week_percentage' => $this->getWeekCompletedPercentage(),
+            'heatmap_start' => $this->getHeatmapStart(),
+            'heatmap_data' => $this->getHeatmapData(),
+            'total_habits' => $this->getTotalHabitCount($habitos),
+        ];
     }
 }
