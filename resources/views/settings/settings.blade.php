@@ -85,11 +85,18 @@
     <div class="mb-6 rounded-[10px] bg-white p-4 shadow-card">
         <div class="mb-2">
             <label for="phone" class="mb-1.5 block text-[13px] font-semibold text-brand-95">WhatsApp</label>
-            <input type="text" id="phone"
-                class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                placeholder="Ej: +54 11 1234-5678" value="{{ auth()->user()?->telefono ?? '' }}">
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <input type="text" id="phone" inputmode="tel" maxlength="20"
+                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50 sm:flex-1"
+                    placeholder="Ej: +5491123456789" value="{{ auth()->user()?->telefono ?? '' }}">
+                <button type="button" id="test-whatsapp"
+                    class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60">
+                    <i class="ti ti-send"></i> Probar envío
+                </button>
+            </div>
         </div>
-        <p class="text-xs text-ink-light">Usado para recordatorios por WhatsApp</p>
+        <p class="text-xs text-ink-light">Usado para recordatorios por WhatsApp. Formato internacional con código de país.</p>
+        <p id="phone-status" class="mt-1 hidden text-xs font-semibold text-[#2E7D32]"></p>
     </div>
 
     <div class="text-center mb-14">
@@ -112,9 +119,13 @@
             const provToggle = document.getElementById('toggle-proverbs');
             const quoteToggle = document.getElementById('toggle-quotes');
             const phoneInput = document.getElementById('phone');
+            const phoneStatus = document.getElementById('phone-status');
+            const testWhatsAppButton = document.getElementById('test-whatsapp');
             const biography = document.getElementById('bio');
 
-            var biographySaveTimer = null;
+            let biographySaveTimer = null;
+            let phoneSaveTimer = null;
+            let lastSavedPhone = phoneInput ? phoneInput.value : null;
 
             const savePreferences = () => {
                 fetch('{{ route('settings.preferences') }}', {
@@ -198,12 +209,85 @@
             if (quoteToggle) quoteToggle.addEventListener('change', savePreferences);
             if (bio) bio.addEventListener('input', saveBiography);
 
-            if (phoneInput) {
-                const savedPhone = localStorage.getItem('whatsappPhone');
-                if (savedPhone !== null) phoneInput.value = savedPhone;
+            const showPhoneStatus = (message, isError = false) => {
+                if (!phoneStatus) return;
+                phoneStatus.textContent = message;
+                phoneStatus.classList.remove('hidden', 'text-[#2E7D32]', 'text-danger');
+                phoneStatus.classList.add(isError ? 'text-danger' : 'text-[#2E7D32]');
+            };
 
-                phoneInput.addEventListener('input', () => {
-                    localStorage.setItem('whatsappPhone', phoneInput.value.trim());
+            const persistPhone = async () => {
+                const value = phoneInput.value.trim();
+
+                if (value === lastSavedPhone) return true;
+
+                try {
+                    const response = await fetch('{{ route('settings.phone') }}', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ telefono: value }),
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json().catch(() => ({}));
+                        showPhoneStatus(data.message ?? 'No se pudo guardar el teléfono.', true);
+                        return false;
+                    }
+
+                    const data = await response.json();
+                    phoneInput.value = data.telefono ?? '';
+                    lastSavedPhone = data.telefono ?? '';
+                    showPhoneStatus(data.telefono ? 'Guardado.' : 'Teléfono eliminado.');
+
+                    return true;
+                } catch {
+                    showPhoneStatus('No se pudo guardar el teléfono.', true);
+
+                    return false;
+                }
+            };
+
+            const savePhone = () => {
+                clearTimeout(phoneSaveTimer);
+                phoneSaveTimer = setTimeout(persistPhone, 800);
+            };
+
+            if (phoneInput) phoneInput.addEventListener('input', savePhone);
+
+            if (testWhatsAppButton && phoneInput) {
+                testWhatsAppButton.addEventListener('click', async () => {
+                    clearTimeout(phoneSaveTimer);
+
+                    if (! await persistPhone()) return;
+
+                    const originalContent = testWhatsAppButton.innerHTML;
+                    testWhatsAppButton.disabled = true;
+                    testWhatsAppButton.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Enviando...';
+
+                    try {
+                        const response = await fetch('{{ route('settings.whatsapp.test') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                        });
+
+                        const data = await response.json().catch(() => ({}));
+                        showPhoneStatus(
+                            data.message ?? (response.ok ? 'Mensaje de prueba enviado.' : 'No se pudo enviar la prueba.'),
+                            ! response.ok,
+                        );
+                    } catch {
+                        showPhoneStatus('No se pudo enviar la prueba.', true);
+                    } finally {
+                        testWhatsAppButton.disabled = false;
+                        testWhatsAppButton.innerHTML = originalContent;
+                    }
                 });
             }
         });

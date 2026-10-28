@@ -1,14 +1,13 @@
 @php
-    $todayCompletedHabits = auth()->user()->getTodaysCompletedHabits();
-    $todayTotalHabits = auth()->user()->getTodaysHabitCount();
-
-    $heatmapStart = auth()->user()->getHeatmapStart();
-    $heatmapCounts = auth()->user()->getHeatmapData();
-    $totalHabits = max(1, auth()->user()->getTotalHabitCount());
+    $todayCompletedHabits = $stats['today_completed'];
+    $todayTotalHabits = $stats['today_total'];
+    $heatmapStart = $stats['heatmap_start'];
+    $heatmapCounts = $stats['heatmap_data'];
+    $totalHabits = max(1, $stats['total_habits']);
 
     $heatLevels = ['#e0e7ee', '#BAE6FD', '#7DD3FC', '#38BDF8', '#0284C7'];
 
-    function heatColorFor(float $ratio, array $levels): string
+    $heatColorFor = function (float $ratio, array $levels): string
     {
         if ($ratio <= 0) {
             return $levels[0];
@@ -24,7 +23,7 @@
         }
 
         return $levels[4];
-    }
+    };
 @endphp
 
 <div>
@@ -32,7 +31,7 @@
         <div class="rounded-[10px] bg-white p-3.5 text-center shadow-card">
             <div class="text-[26px] font-bold leading-tight text-brand-80">
                 @if ($todayTotalHabits > 0)
-                    {{ $todayCompletedHabits }}/{{ $todayTotalHabits }}
+                    <span data-today-completed>{{ $todayCompletedHabits }}</span>/{{ $todayTotalHabits }}
                 @else
                     Sin hábitos.
                 @endif
@@ -40,13 +39,13 @@
             <div class="mt-0.5 text-xs text-ink-light">Completado hoy</div>
         </div>
         <div class="rounded-[10px] bg-white p-3.5 text-center shadow-card">
-            <div class="text-[26px] font-bold leading-tight text-orange">{{ auth()->user()->getCurrentRacha() }}<i
+            <div class="text-[26px] font-bold leading-tight text-orange">{{ $stats['current_streak'] }}<i
                     class="ti ti-bolt"></i></div>
             <div class="mt-0.5 text-xs text-ink-light">Racha actual</div>
         </div>
         <div class="rounded-[10px] bg-white p-3.5 text-center shadow-card">
             <div class="text-[26px] font-bold leading-tight text-brand-80">
-                {{ auth()->user()->getWeekCompletedPercentage() }}%</div>
+                {{ $stats['week_percentage'] }}%</div>
             <div class="mt-0.5 text-xs text-ink-light">Esta semana</div>
         </div>
     </div>
@@ -63,7 +62,7 @@
                             $n = $heatmapCounts[$date->format('Y-m-d')] ?? 0;
                             $color = $future
                                 ? 'rgba(208, 216, 226, 0.35)'
-                                : heatColorFor($n / $totalHabits, $heatLevels);
+                                : $heatColorFor($n / $totalHabits, $heatLevels);
                             $label = $future ? '' : 'title="' . $date->format('d/m/Y') . ' · ' . $n . ($n === 1 ? ' cumplimiento' : ' cumplimientos') . '"';
                         @endphp
                         <div class="h-[14px] w-[14px] flex-1 shrink-0 rounded-[2px]"

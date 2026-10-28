@@ -1,37 +1,80 @@
 <script>
-    function openEdit(name, freq, priority) {
-        document.getElementById('e-name').value = name;
-        document.getElementById('e-freq').value = freq;
-        document.getElementById('e-priority').value = priority;
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) window.location.reload();
+    });
+
+    async function toggleHabit(button) {
+        const url = button.dataset.completeUrl;
+
+        if (!url || button.disabled) return;
+
+        const completed = button.getAttribute('aria-pressed') === 'true';
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(url, {
+                method: completed ? 'DELETE' : 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) throw new Error('No se pudo actualizar el hábito.');
+
+            const data = await response.json();
+            const habit = button.closest('[data-habit-id]');
+            const streak = habit?.querySelector('[data-habit-streak]');
+            const completedToday = document.querySelector('[data-today-completed]');
+
+            if (completed) {
+                button.classList.remove('border-brand-50', 'bg-brand-50');
+                button.classList.add('border-brand-70');
+                button.innerHTML = '';
+                button.setAttribute('aria-pressed', 'false');
+                button.setAttribute('aria-label', 'Marcar hábito como completado');
+            } else {
+                button.classList.remove('border-brand-70');
+                button.classList.add('border-brand-50', 'bg-brand-50');
+                button.innerHTML = '<i class="ti ti-check"></i>';
+                button.setAttribute('aria-pressed', 'true');
+                button.setAttribute('aria-label', 'Hábito completado hoy');
+            }
+
+            if (streak) {
+                streak.innerHTML = `${Number(data.streak)} <i class="ti ti-bolt"></i>`;
+            }
+
+            if (completedToday && data.changed) {
+                const total = Number(completedToday.textContent) + (completed ? -1 : 1);
+                completedToday.textContent = Math.max(0, total);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function openEdit(element) {
+        const habit = element.closest('[data-habit-id]');
+        document.getElementById('e-id').value = habit.dataset.habitId;
+        document.getElementById('e-name').value = habit.dataset.habitName;
+        document.getElementById('e-desc').value = habit.dataset.habitDescription || '';
+        document.getElementById('e-freq').value = habit.dataset.habitFrequency;
+        document.getElementById('e-priority').value = habit.dataset.habitPriority;
+        document.getElementById('e-reminder').value = habit.dataset.habitReminder || '';
         document.getElementById('editDialog').classList.remove('hidden');
     }
 
-    function openDelete(name) {
-        document.getElementById('delete-name').textContent = '"' + name + '"';
+    function openDelete(element) {
+        const habit = element.closest('[data-habit-id]');
+        document.getElementById('delete-id').value = habit.dataset.habitId;
+        document.getElementById('delete-name').textContent = '"' + habit.dataset.habitName + '"';
         document.getElementById('deleteDialog').classList.remove('hidden');
     }
-
-    const proverbs = [
-        { text: "La blanda respuesta quita la ira; mas la palabra áspera hace subir el furor.", ref: "Proverbios 15:1" },
-        { text: "El que guarda su boca guarda su alma; mas el que mucho abre sus labios tendrá calamidad.", ref: "Proverbios 13:3" },
-        { text: "Encomienda a Jehová tus obras, y tus pensamientos serán afirmados.", ref: "Proverbios 16:3" },
-        { text: "El corazón alegre hermosea el rostro; mas por el dolor del corazón el espíritu se abate.", ref: "Proverbios 15:13" },
-        { text: "Mejor es lo poco con el temor de Jehová, que el gran tesoro donde hay turbación.", ref: "Proverbios 15:16" },
-        { text: "El que camina en integridad anda seguro; mas el que pervierte sus caminos será quebrantado.", ref: "Proverbios 10:9" },
-        { text: "El corazón del hombre traza su rumbo, pero sus pasos los dirige el Señor.", ref: "Proverbios 16:9" },
-        { text: "Como agua fría al alma sedienta, así son las buenas nuevas de lejanas tierras.", ref: "Proverbios 25:25" }
-    ];
-
-    const motivationalQuotes = [
-        { text: "La única forma de hacer un gran trabajo es amar lo que haces.", ref: "Steve Jobs" },
-        { text: "No juzgues cada día por la cosecha que recoges, sino por las semillas que plantas.", ref: "Robert Louis Stevenson" },
-        { text: "La motivación es lo que te pone en marcha. El hábito es lo que hace que sigas.", ref: "Jim Ryun" },
-        { text: "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.", ref: "Albert Schweitzer" },
-        { text: "Los pequeños hábitos diarios son los que construyen los grandes resultados.", ref: "Anónimo" },
-        { text: "Cree que puedes y casi habrás llegado.", ref: "Theodore Roosevelt" },
-        { text: "No cuentes los días, haz que los días cuenten.", ref: "Muhammad Ali" },
-        { text: "La disciplina es el puente entre las metas y los logros.", ref: "Jim Rohn" }
-    ];
 
     var refreshBtnTimeout = -1;
 
@@ -64,10 +107,10 @@
 
         if (!card) return;
 
-        const showProverbs = {{ auth()->user()?->wantsProverbios() ? 'true' : 'false' }};
-        const showQuotes = {{ auth()->user()?->wantsFrases() ? 'true' : 'false' }};
+        const motivationEnabled = {{ $motivationEnabled ? 'true' : 'false' }};
+        const pool = @js($motivation);
 
-        if (!showProverbs && !showQuotes) {
+        if (!motivationEnabled) {
             setMotivationDisabled(card, tag, quoteEl, sourceEl, true);
             card.style.display = 'block';
             if (tag) tag.style.display = 'none';
@@ -81,11 +124,13 @@
         if (refreshBtn) refreshBtn.style.display = 'flex';
         card.style.display = 'block';
 
-        let pool = [];
-        if (showProverbs) pool = pool.concat(proverbs.map(p => ({ ...p, type: 'Proverbio Bíblico', icon: 'ti-book' })));
-        if (showQuotes) pool = pool.concat(motivationalQuotes.map(q => ({ ...q, type: 'Frase Motivacional', icon: 'ti-quote' })));
-
-        if (pool.length === 0) return;
+        if (pool.length === 0) {
+            if (tag) tag.style.display = 'none';
+            if (refreshBtn) refreshBtn.style.display = 'none';
+            quoteEl.textContent = 'No hay contenido motivacional disponible.';
+            sourceEl.textContent = '';
+            return;
+        }
 
         const currentQuote = quoteEl.textContent.replace(/"/g, '');
         let selected;
@@ -139,16 +184,8 @@
         else if (prefixEl) prefixEl.textContent = 'Bienvenido';
     }
 
-    function checkPhoneNumberWarning() {
-        const alertCard = document.getElementById('phone-warning-alert');
-        if (!alertCard) return;
-        const savedPhone = localStorage.getItem('whatsappPhone');
-        alertCard.style.display = (!savedPhone || savedPhone.trim() === '') ? 'flex' : 'none';
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         initMotivation();
-        checkPhoneNumberWarning();
         initWelcomeGreeting();
     });
 </script>

@@ -11,6 +11,18 @@
 @endsection
 
 @section('content')
+    @if (session('status'))
+        <div class="mb-4 rounded-lg border border-[#2E7D32]/30 bg-[#2E7D32]/10 px-4 py-3 text-sm font-semibold text-[#2E7D32]">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
     @include('habits.partials.welcome')
     @include('habits.partials.motivation-card')
 

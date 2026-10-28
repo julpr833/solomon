@@ -17,25 +17,32 @@
                     hábito</label>
                 <input type="text" id="hname" name="objetivo"
                     class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="Ej: Leer 15 minutos">
+                    placeholder="Ej: Leer 15 minutos" maxlength="45" required>
             </div>
             <div class="mb-4">
                 <label for="hdesc" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Descripción
                     (opcional)</label>
                 <textarea id="hdesc" name="descripcion"
                     class="block w-full resize-y min-h-20 px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="¿Por qué quieres crear este hábito?"></textarea>
+                    placeholder="¿Por qué quieres crear este hábito?" maxlength="300"></textarea>
             </div>
             <div class="mb-4">
                 <label for="hfreq" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Frecuencia</label>
                 <select id="hfreq" name="frecuencia"
                     class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50">
-                    <option value="Pluridiaria">Varias veces al día</option>
+                    {{-- <option value="Pluridiaria">Varias veces al día</option> --}}
                     <option value="Daria" selected>Diario</option>
                     <option value="Semanal">Semanal</option>
                     <option value="Mensual">Mensual</option>
-                    <option value="Mensual">Anual</option>
+                    <option value="Anual">Anual</option>
                 </select>
+            </div>
+            <div class="mb-4">
+                <label for="hreminder" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Hora del recordatorio
+                    (opcional)</label>
+                <input type="time" id="hreminder" name="hora_recordatorio"
+                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50">
+                <p class="mt-1 text-xs text-ink-light">Se enviará por WhatsApp según la frecuencia del hábito.</p>
             </div>
             <div class="mb-4">
                 <label for="hpriority" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Prioridad</label>
@@ -63,30 +70,38 @@
         <form method="POST" action="{{ route('habit.edit') }}">
             @csrf
             @method('PATCH')
+            <input type="hidden" id="e-id" name="habito_id">
             <div class="mb-4">
                 <label for="e-name" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Nombre del
                     hábito</label>
                 <input type="text" id="e-name" name="objetivo"
                     class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="Ej: Leer 15 minutos">
+                    placeholder="Ej: Leer 15 minutos" maxlength="45" required>
             </div>
             <div class="mb-4">
                 <label for="e-desc" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Descripción
                     (opcional)</label>
                 <textarea id="e-desc" name="descripcion"
                     class="block w-full resize-y min-h-20 px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50"
-                    placeholder="¿Por qué quieres mantener este hábito?"></textarea>
+                    placeholder="¿Por qué quieres mantener este hábito?" maxlength="300"></textarea>
             </div>
             <div class="mb-4">
                 <label for="e-freq" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Frecuencia</label>
                 <select id="e-freq" name="frecuencia"
                     class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50">
-                    <option value="Pluridiaria">Varias veces al día</option>
+                    {{-- <option value="Pluridiaria">Varias veces al día</option> --}}
                     <option value="Daria">Diario</option>
                     <option value="Semanal">Semanal</option>
                     <option value="Mensual">Mensual</option>
-                    <option value="Mensual">Anual</option>
+                    <option value="Anual">Anual</option>
                 </select>
+            </div>
+            <div class="mb-4">
+                <label for="e-reminder" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Hora del recordatorio
+                    (opcional)</label>
+                <input type="time" id="e-reminder" name="hora_recordatorio"
+                    class="block w-full px-3.5 py-3 border-[1.5px] border-line rounded-lg bg-white text-ink outline-none transition-colors duration-200 focus:border-brand-50">
+                <p class="mt-1 text-xs text-ink-light">Se enviará por WhatsApp según la frecuencia del hábito.</p>
             </div>
             <div class="mb-4">
                 <label for="e-priority" class="mb-1.5 block text-[13px] font-semibold text-brand-95">Prioridad</label>
@@ -121,6 +136,7 @@
             <form method="POST" action="{{ route('habit.delete') }}" class="flex-1">
                 @csrf
                 @method('DELETE')
+                <input type="hidden" id="delete-id" name="habito_id">
                 <button type="submit"
                     class="inline-flex w-full items-center justify-center gap-1.5 px-6 py-3 rounded-lg font-semibold text-[15px] cursor-pointer bg-danger text-white hover:opacity-90 transition-opacity duration-200 active:scale-[0.98]">Eliminar</button>
             </form>

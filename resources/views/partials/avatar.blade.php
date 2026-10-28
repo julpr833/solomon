@@ -5,7 +5,7 @@
     $initial = strtoupper(mb_substr(trim($name), 0, 1));
 @endphp
 
-<div class="relative bg-sky-200 py-1 px-2.5 rounded-md shadow-md shadow-black/25 transition-colors hover:bg-sky-100"
+<div class="relative bg-brand-80/20 py-1 px-3 rounded-sm shadow-md shadow-black/25 transition-colors hover:bg-sky-100"
     id="user-menu">
     <button id="user-menu-btn" type="button" aria-haspopup="true" aria-expanded="false"
         class="flex cursor-pointer items-center gap-2 rounded-full border-transparent bg-transparent p-0 transition-colors hover:opacity-90">
