@@ -133,6 +133,7 @@ solomon/
 | 8000  | Web (Nginx/PHP)  |
 | 3307  | MySQL (Docker)   |
 | 3306  | MySQL (local)    |
+| 3000  | WAHA             |
 
 ## License
 
